@@ -20,12 +20,13 @@ class Tool {
     }
 }
 let isEmpty = true;
+let savedSquare = undefined;
 let squareTo;
 let toolTo;
 let isclicked = false;
 const RowSize = '8';
 const SquareArr = [];
-SquareArr[0]=undefined;
+SquareArr[0] = undefined;
 const firstRowColor = 'white';
 const toolRows = [1, 2, 7, 8];
 const lastRowColor = firstRowColor === 'black' ? 'white' : 'black';
@@ -81,29 +82,39 @@ function startGame() {
             squareTo = new Square(square, rowIndex, columnIndex, false, isEmpty, toolTo);
             SquareArr.push(squareTo);
             square.onclick = () => {
-                isclicked = true;
                 selectedSqure = SquareArr[getIndex(rowIndex, columnIndex)];
-                if (selectedSqure.empty == false) {
-                    switch (selectedSqure.tool.name) {
-                        case 'rook': RookAvailible(rowIndex, columnIndex);
-                            break;
-                        case 'bishop': bishopAvailible(rowIndex, columnIndex);
-                            break;
-                        case 'queen': QueenAvailible(rowIndex, columnIndex);
-                            break;
-                        case 'king': KingAvailible(rowIndex, columnIndex);
-                            break;
-                        case 'pawn': PawnAvailible(rowIndex, columnIndex, selectedSqure.tool.color);
-                            break;
-
+                if (savedSquare != undefined) {
+                    if (savedSquare == selectedSqure) {
+                        isclicked =!isclicked;
                     }
-
-                    ColorAll();
-                    selectedSqure.style.backgroundColor = SelectedSquareColor;
+                    else {
+                        isclicked = false;
+                    }
                 }
+                savedSquare = selectedSqure;
+                if (!isclicked) {
+                    if (selectedSqure.empty == false) {
+                        switch (selectedSqure.tool.name) {
+                            case 'rook': RookAvailible(rowIndex, columnIndex);
+                                break;
+                            case 'bishop': bishopAvailible(rowIndex, columnIndex);
+                                break;
+                            case 'queen': QueenAvailible(rowIndex, columnIndex);
+                                break;
+                            case 'king': KingAvailible(rowIndex, columnIndex);
+                                break;
+                            case 'pawn': PawnAvailible(rowIndex, columnIndex, selectedSqure.tool.color);
+                                break;
+                        }
+                    }
+                }
+                else{
+                    ResetAvalible();
+                }
+                ColorAll();
+                selectedSqure.square.style.backgroundColor = SelectedSquareColor;
             }
             row.appendChild(square);
-
         }
         tbody.appendChild(row);
     }
@@ -160,9 +171,9 @@ const KingAvailible = (rowIndex, columnIndex) => {
 }
 
 const PawnAvailible = (rowIndex, columnIndex, color) => {
-    for (let i = 1; 1 < SquareArr.length; i++) {
+    for (let i = 1; i < SquareArr.length; i++) {
         if (color == 'black') {
-            if (parseInt(SquareArr[i].rowIndex) ==parseInt(rowIndex - 1)  && SquareArr[i].columnIndex == columnIndex) {
+            if (parseInt(SquareArr[i].rowIndex) == parseInt(rowIndex - 1) && SquareArr[i].columnIndex == columnIndex) {
                 SquareArr[i].avalibleToStepOn = true;
             }
             else {
@@ -170,7 +181,7 @@ const PawnAvailible = (rowIndex, columnIndex, color) => {
             }
         }
         else {
-            if (parseInt(SquareArr[i].rowIndex) ==parseInt(rowIndex + 1) && SquareArr[i].columnIndex == columnIndex) {
+            if (parseInt(SquareArr[i].rowIndex) == parseInt(rowIndex + 1) && SquareArr[i].columnIndex == columnIndex) {
                 SquareArr[i].avalibleToStepOn = true;
             }
             else {
@@ -179,8 +190,17 @@ const PawnAvailible = (rowIndex, columnIndex, color) => {
         }
     }
 }
+
+const KnightAvailible = (rowIndex, columnIndex) => {
+
+}
+const ResetAvalible = () => {
+    for (let i = 1; i < SquareArr.length; i++) {
+        SquareArr[i].avalibleToStepOn = false;
+    }
+}
 const ColorAll = () => {
-    for (let i = 1; 1 <SquareArr.length; i++) {
+    for (let i = 1; i < SquareArr.length; i++) {
         if (SquareArr[i].avalibleToStepOn == true) {
             SquareArr[i].square.style.backgroundColor = avalibleSquareColor;
         }
