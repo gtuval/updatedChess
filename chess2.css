@@ -1,0 +1,30 @@
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+table{
+    height: 700px;
+    width: 700px;
+    border: 7px solid black;
+    border-spacing: 0px;
+}
+td{
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    border: 2px double rgba(14, 11, 11, 0.26);
+}
+img{
+    width: 55px;
+    height: 55px;
+}
+
+tr:nth-child(odd) td:nth-child(even),tr:nth-child(even) td:nth-child(odd)
+{
+    background: rgba(0, 0, 0, 0.699);
+}
+tr:nth-child(odd) td:nth-child(even):hover,tr:nth-child(even) td:nth-child(odd):hover,td:hover{
+    background: gray;
+}
