@@ -2,8 +2,8 @@ const PIECES = {
   ROOK: "ROOK",
   KNIGHT: "KNIGHT",
   BISHOP: "BISHOP",
-  QUEEN: "QUEEN",
   KING: "KING",
+  QUEEN: "QUEEN",
   PAWN: "PAWN",
 };
 
@@ -36,6 +36,7 @@ const SECOND_PLAYER_COLOR =
 
 class Piece {
   constructor(name, color) {
+    console.log({ name, color });
     this.name = name;
     this.color = color;
 
@@ -43,7 +44,6 @@ class Piece {
   }
 
   createHtmlElement() {
-    console.log(`${this.name}_${this.color}`);
     this.htmlElement = document.createElement("img");
     this.htmlElement.setAttribute("id", `${this.name}_${this.color}`);
     this.htmlElement.src = `images/${this.color}_${this.name}.png`;
@@ -56,8 +56,7 @@ class Piece {
       direction = true;
       moves.push(cell);
     }
-
-  }
+  };
 
   getStraightMoves = (rowIndex, columnIndex, board, maxMoves) => {
     const moves = [];
@@ -75,7 +74,7 @@ class Piece {
       //check Up
       if (!upDirection && upRowIndex >= 0) {
         const cell = board.getCell(upRowIndex, columnIndex);
-        this.checkOptions(cell, moves, upDirection)
+        this.checkOptions(cell, moves, upDirection);
       }
       // check right
       if (!rightDirection && rightColumnIndex < ROW_SIZE) {
@@ -129,72 +128,72 @@ class Piece {
       }
     }
     return moves;
-  };
+  }
 
-
-  GetPieceMove = (type) => {
-    let tool;
-    if (type === "ROOK") {
-      tool = new Rook();
-    }
-    else if (type === "BISHOP") {
-      tool = new BISHOP();
-    }
-    else if (type === "KNIGHT") {
-      tool = new KNIGHT();
-    }
-    else if (type === "PAWN") {
-      tool = new PAWN();
-    }
-    else if (type === "QUEEN") {
-      tool = new QUEEN();
-    }
-    else if (type === "KING") {
-      tool = new KING();
-    }
-    tool.getMoves(rowIndex, columnIndex, board);
-  };
+  getMoves(rowIndex, columnIndex, board) {
+    const knight = new Knight();
+    knight.getMoves(rowIndex, columnIndex, board);
+  }
 }
 
 class Rook extends Piece {
-  constructor() { super() }
+  constructor(color) {
+    super(PIECES.ROOK, color);
+  }
 
   getMoves = (rowIndex, columnIndex, board) => {
     return this.getStraightMoves(rowIndex, columnIndex, board, ROW_SIZE);
   };
 }
 
-
-class BISHOP extends Piece {
-  constructor() { super() }
+class Bishop extends Piece {
+  constructor(color) {
+    super(PIECES.BISHOP, color);
+  }
 
   getMoves = (rowIndex, columnIndex, board) => {
     return this.getDiagonalMoves(rowIndex, columnIndex, board, ROW_SIZE);
   };
 }
 
+class Queen extends Piece {
+  constructor(color) {
+    super(PIECES.QUEEN, color);
+  }
 
-class QUEEN extends Piece {
-  constructor() { super() }
   getMoves = (rowIndex, columnIndex, board) => {
-    return this.getDiagonalMoves(rowIndex, columnIndex, board, ROW_SIZE).concat(this.getStraightMoves(rowIndex, columnIndex, board, ROW_SIZE));
+    return this.getDiagonalMoves(rowIndex, columnIndex, board, ROW_SIZE).concat(
+      this.getStraightMoves(rowIndex, columnIndex, board, ROW_SIZE)
+    );
   };
 }
 
+class King extends Piece {
+  constructor(color) {
+    super(PIECES.KING, color);
+  }
 
-class KING extends Piece {
-  constructor() { super() }
   getMoves = (rowIndex, columnIndex, board) => {
-    return this.getDiagonalMoves(rowIndex, columnIndex, board, 2).concat(this.getStraightMoves(rowIndex, columnIndex, board, 2));
+    return this.getDiagonalMoves(rowIndex, columnIndex, board, 2).concat(
+      this.getStraightMoves(rowIndex, columnIndex, board, 2)
+    );
   };
 }
 
-class PAWN extends Piece {
-  constructor() { super() }
+class Pawn extends Piece {
+  constructor(color) {
+    super(PIECES.PAWN, color);
+  }
+
+  createHtmlElement() {
+    this.htmlElement = document.createElement("img");
+    this.htmlElement.setAttribute("id", `${this.name}_${this.color}`);
+    this.htmlElement.src = `images/${this.color}_${this.name}.png`;
+  }
   getMoves(rowIndex, columnIndex, board) {
     const moves = [];
     let cell = board.getCell(rowIndex, columnIndex);
-    if (cell.getPieceColor() == FIRST_PLAYER_COLOR) {
+    if (cell.piece.color == FIRST_PLAYER_COLOR) {
       if (rowIndex + 1 <= 7) {
         cell = board.getCell(rowIndex + 1, columnIndex);
         if (cell.isEmpty()) {
@@ -202,13 +201,13 @@ class PAWN extends Piece {
         }
         if (columnIndex + 1 <= 7) {
           cell = board.getCell(rowIndex + 1, columnIndex + 1);
-          if (cell.getPieceColor() !== this.color) {
+          if (cell.piece.color !== this.color) {
             moves.push(cell);
           }
         }
         if (columnIndex - 1 >= 0) {
           cell = board.getCell(rowIndex + 1, columnIndex + -1);
-          if (cell.getPieceColor() !== this.color) {
+          if (cell.piece.color !== this.color) {
             moves.push(cell);
           }
         }
@@ -237,92 +236,96 @@ class PAWN extends Piece {
   }
 }
 
-class KNIGHT extends Piece {
-  constructor() { super() }
 
+class Knight extends Piece {
+  constructor(color) {
+    super(PIECES.KNIGHT, color);
+  }
+
+  inBoard(rowIndex, columnIndex) {
+    if (
+      rowIndex >= 0 &&
+      rowIndex <= 7 &&
+      columnIndex >= 0 &&
+      columnIndex <= 7
+    ) {
+      return true;
+    }
+    return false;
+  }
   getMoves(rowIndex, columnIndex, board) {
     const row2 = rowIndex + 2;
     const row_2 = rowIndex - 2;
     const row1 = rowIndex + 1;
-    const row_1 = rowIndex - 1
+    const row_1 = rowIndex - 1;
     const col1 = columnIndex + 1;
     const col_1 = columnIndex - 1;
     const col2 = columnIndex + 2;
     const col_2 = columnIndex - 2;
     const moves = [];
     let cell = board.getCell(rowIndex, columnIndex);
-    if (cell.inBoard(row_2, col1)) {
+    if (this.inBoard(row_2, col1)) {
       cell = board.getCell(row_2, col1);
       if (cell.isEmpty()) {
         moves.push(cell);
-      }
-      else if (cell.getPieceColor() !== this.color) {
+      } else if (cell.getPieceColor() !== this.color) {
         moves.push(cell);
       }
     }
 
-    if (cell.inBoard(row_2, col_1)) {
+    if (this.inBoard(row_2, col_1)) {
       cell = board.getCell(row_2, col_1);
       if (cell.isEmpty()) {
         moves.push(cell);
-      }
-      else if (cell.getPieceColor() !== this.color) {
+      } else if (cell.getPieceColor() !== this.color) {
         moves.push(cell);
       }
     }
-    if (cell.inBoard(row_1, col2)) {
+    if (this.inBoard(row_1, col2)) {
       cell = board.getCell(row_1, col2);
       if (cell.isEmpty()) {
         moves.push(cell);
-      }
-      else if (this.getPieceColor() !== this.color) {
+      } else if (cell.getPieceColor() !== this.color) {
         moves.push(cell);
       }
     }
-    if (cell.inBoard(row_1, col_2)) {
+    if (this.inBoard(row_1, col_2)) {
       cell = board.getCell(row_1, col_2);
       if (cell.isEmpty()) {
         moves.push(cell);
-      }
-      else if (cell.getPieceColor() !== this.color) {
+      } else if (cell.getPieceColor() !== this.color) {
         moves.push(cell);
       }
     }
-    if (cell.inBoard(row2, col1)) {
+    if (this.inBoard(row2, col1)) {
       cell = board.getCell(row2, col1);
-      console.log(this.color);
-      console.log(cell.getPieceColor());
       if (cell.isEmpty()) {
         moves.push(cell);
-      }
-      else if (cell.getPieceColor() !== this.color) {
+      } else if (cell.getPieceColor() !== this.color) {
         moves.push(cell);
       }
     }
-    if (cell.inBoard(row2, col_1)) {
+    if (this.inBoard(row2, col_1)) {
       cell = board.getCell(row2, col_1);
       if (cell.isEmpty()) {
         moves.push(cell);
-      }
-      else if (cell.getPieceColor() !== this.color) {
+      } else if (cell.getPieceColor() !== this.color) {
         moves.push(cell);
       }
     }
-    if (cell.inBoard(row1, col2)) {
+    if (this.inBoard(row1, col2)) {
       cell = board.getCell(row1, col2);
       if (cell.isEmpty()) {
         moves.push(cell);
-      }
-      else if (cell.getPieceColor() !== this.color) {
+      } else if (cell.getPieceColor() !== this.color) {
         moves.push(cell);
       }
     }
-    if (cell.inBoard(row1, col_2)) {
+    if (this.inBoard(row1, col_2)) {
       cell = board.getCell(row1, col_2);
       if (cell.isEmpty()) {
         moves.push(cell);
-      }
-      else if (cell.getPieceColor() !== this.color) {
+      } else if (cell.getPieceColor() !== this.color) {
         moves.push(cell);
       }
     }
@@ -330,32 +333,16 @@ class KNIGHT extends Piece {
   }
 }
 
-
 class Cell {
-  constructor(
-    rowIndex,
-    columnIndex,
-    isAvailable,
-    chessPieceName,
-    onCellClicked
-  ) {
+  constructor(rowIndex, columnIndex, isAvailable, piece, onCellClicked) {
     this.rowIndex = rowIndex;
     this.columnIndex = columnIndex;
     this.isAvailable = isAvailable;
-    this.chessPieceName = chessPieceName;
+    this.piece = piece;
     this.onCellClicked = onCellClicked;
+    this.piece = piece;
 
-    if (this.chessPieceName) {
-      const color = this.getRowColor(this.rowIndex);
-      this.piece = new Piece(this.chessPieceName, color);
-    }
     this.createHtmlElement();
-  }
-  inBoard(rowIndex, columnIndex) {
-    if (rowIndex >= 0 && rowIndex <= 7 && columnIndex >= 0 && columnIndex <= 7) {
-      return true;
-    }
-    return false;
   }
 
   isEmpty() {
@@ -370,13 +357,6 @@ class Cell {
     return this.piece.color;
   }
 
-  getRowColor = (rowIndex) => {
-    if (FIRST_PLAYER_COLOR_ROWS.includes(rowIndex)) {
-      return FIRST_PLAYER_COLOR;
-    }
-    return SECOND_PLAYER_COLOR;
-  };
-
   onClick() {
     this.isSelected = !this.isSelected;
     this.updateSelected();
@@ -387,7 +367,7 @@ class Cell {
 
   createHtmlElement() {
     this.htmlElement = document.createElement("td");
-    if (this.chessPieceName) {
+    if (this.piece) {
       this.htmlElement.setAttribute(
         `id`,
         `${this.rowIndex}_${this.columnIndex}`
@@ -431,25 +411,14 @@ class Cell {
   }
 }
 
-
-
 class Board {
   board = [];
   selectedCell = undefined;
 
-  constructor() { }
+  constructor() {}
 
   getCell = (rowIndex, columnIndex) => {
     return this.board[rowIndex][columnIndex];
-  };
-
-  getChessPieceName = (rowIndex, columnIndex) => {
-    if (PAWN_INITIAL_ROWS.includes(rowIndex)) {
-      return PIECES.PAWN;
-    } else if (PIECES_INITIAL_ROWS.includes(rowIndex)) {
-      //Return chess tool according to column index
-      return PIECES_ORDER[columnIndex];
-    }
   };
 
   onCellClicked = (cell) => {
@@ -478,15 +447,13 @@ class Board {
       let htmlTr = document.createElement("tr");
       const boardRowArray = [];
       for (let columnIndex = 0; columnIndex < ROW_SIZE; columnIndex++) {
-        const pieceName =
-          rowIndex === 5 && columnIndex === 6
-            ? PIECES.KNIGHT
-            : this.getChessPieceName(rowIndex, columnIndex);
+        const pieceFactory = PieceFactory();
+        const piece = pieceFactory.createPiece(rowIndex, columnIndex);
         const cell = new Cell(
           rowIndex,
           columnIndex,
           false,
-          pieceName,
+          piece,
           this.onCellClicked
         );
         boardRowArray.push(cell);
@@ -494,13 +461,58 @@ class Board {
       }
       this.board.push(boardRowArray);
       console.log({ boardRowArray });
-      table.appendChild(htmlTr);
+      tbody.appendChild(htmlTr);
     }
   }
 }
 
+const PieceFactory = () => {
+  getChessPieceName = (rowIndex, columnIndex) => {
+    if (PAWN_INITIAL_ROWS.includes(rowIndex)) {
+      return PIECES.PAWN;
+    } else if (PIECES_INITIAL_ROWS.includes(rowIndex)) {
+      //Return chess tool according to column index
+      return PIECES_ORDER[columnIndex];
+    }
+  };
+
+  getRowColor = (rowIndex) => {
+    if (FIRST_PLAYER_COLOR_ROWS.includes(rowIndex)) {
+      return FIRST_PLAYER_COLOR;
+    }
+    return SECOND_PLAYER_COLOR;
+  };
+
+  createPiece = (rowIndex, columnIndex) => {
+    const pieceName = this.getChessPieceName(rowIndex, columnIndex);
+    if (!pieceName) {
+      return undefined;
+    }
+    const color = this.getRowColor(rowIndex);
+    switch (pieceName.toUpperCase()) {
+      case PIECES.BISHOP:
+        return new Piece(PIECES.BISHOP, color);
+      case PIECES.KING:
+        return new King(color);
+      case PIECES.KNIGHT:
+        return new Knight(color);
+      case PIECES.PAWN:
+        return new Pawn(color);
+      case PIECES.QUEEN:
+        return new Queen(color);
+      case PIECES.ROOK:
+        return new Rook(color);
+      default:
+        return undefined;
+    }
+  };
+
+  return {
+    createPiece,
+  };
+};
+
 startGame = () => {
   const board = new Board();
   board.createBoard();
-}
-
+};
