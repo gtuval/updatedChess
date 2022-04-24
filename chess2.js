@@ -2,8 +2,8 @@ const PIECES = {
   ROOK: "ROOK",
   KNIGHT: "KNIGHT",
   BISHOP: "BISHOP",
-  KING: "KING",
   QUEEN: "QUEEN",
+  KING: "KING",
   PAWN: "PAWN",
 };
 
@@ -20,8 +20,8 @@ const PIECES_ORDER = [
   PIECES.ROOK,
   PIECES.KNIGHT,
   PIECES.BISHOP,
-  PIECES.QUEEN,
   PIECES.KING,
+  PIECES.QUEEN,
   PIECES.BISHOP,
   PIECES.KNIGHT,
   PIECES.ROOK,
@@ -33,10 +33,12 @@ const FIRST_PLAYER_COLOR_ROWS = [0, 1];
 const FIRST_PLAYER_COLOR = COLORS.WHITE;
 const SECOND_PLAYER_COLOR =
   FIRST_PLAYER_COLOR === COLORS.BLACK ? COLORS.WHITE : COLORS.BLACK;
-
+const STEPS = {
+  WHITE: FIRST_PLAYER_COLOR === COLORS.WHITE ? 1 : -1,
+  BLACK: FIRST_PLAYER_COLOR === COLORS.BLACK ? 1 : -1,
+};
 class Piece {
   constructor(name, color) {
-    console.log({ name, color });
     this.name = name;
     this.color = color;
 
@@ -47,15 +49,18 @@ class Piece {
     this.htmlElement = document.createElement("img");
     this.htmlElement.setAttribute("id", `${this.name}_${this.color}`);
     this.htmlElement.src = `images/${this.color}_${this.name}.png`;
+    return this.htmlElement;
   }
 
-  checkOptions = (cell, moves, direction) => {
+  checkOptions = (cell, moves) => {
     if (cell.isEmpty()) {
       moves.push(cell);
-    } else if (!direction && cell.getPieceColor() !== this.color) {
-      direction = true;
+      return false;
+    } else if (cell.getPieceColor() !== this.color) {
       moves.push(cell);
+      return true;
     }
+    return true;
   };
 
   getStraightMoves = (rowIndex, columnIndex, board, maxMoves) => {
@@ -72,24 +77,25 @@ class Piece {
       const rightColumnIndex = columnIndex + index;
 
       //check Up
+
       if (!upDirection && upRowIndex >= 0) {
         const cell = board.getCell(upRowIndex, columnIndex);
-        this.checkOptions(cell, moves, upDirection);
+        upDirection = this.checkOptions(cell, moves);
       }
       // check right
       if (!rightDirection && rightColumnIndex < ROW_SIZE) {
         const cell = board.getCell(rowIndex, rightColumnIndex);
-        this.checkOptions(cell, moves, rightDirection);
+        rightDirection = this.checkOptions(cell, moves);
       }
       //check Down
       if (!downDirection && downRowIndex < ROW_SIZE) {
         const cell = board.getCell(downRowIndex, columnIndex);
-        this.checkOptions(cell, moves, downDirection);
+        downDirection = this.checkOptions(cell, moves);
       }
       // check Left
       if (!leftDirection && leftColumnIndex >= 0) {
         const cell = board.getCell(rowIndex, leftColumnIndex);
-        this.checkOptions(cell, moves, leftDirection);
+        leftDirection = this.checkOptions(cell, moves);
       }
     }
     return moves;
@@ -109,30 +115,29 @@ class Piece {
       //check up Left
       if (!upLeftDirection && upRowIndex >= 0 && leftColumnIndex >= 0) {
         const cell = board.getCell(upRowIndex, leftColumnIndex);
-        this.checkOptions(cell, moves, upLeftDirection);
+        upLeftDirection = this.checkOptions(cell, moves);
       }
       // check up right
       if (!upRightDirection && upRowIndex >= 0 && rightColumnIndex <= 7) {
         const cell = board.getCell(upRowIndex, rightColumnIndex);
-        this.checkOptions(cell, moves, upRightDirection);
+        upRightDirection = this.checkOptions(cell, moves);
       }
       // check down right
       if (!downRightDirection && downRowIndex <= 7 && rightColumnIndex <= 7) {
         const cell = board.getCell(downRowIndex, rightColumnIndex);
-        this.checkOptions(cell, moves, downRightDirection);
+        downRightDirection = this.checkOptions(cell, moves);
       }
       //check down left
       if (!downLeftDirection && downRowIndex <= 7 && rightColumnIndex >= 0) {
         const cell = board.getCell(downRowIndex, leftColumnIndex);
-        this.checkOptions(cell, moves, downLeftDirection);
+        downLeftDirection = this.checkOptions(cell, moves);
       }
     }
     return moves;
   }
 
   getMoves(rowIndex, columnIndex, board) {
-    const knight = new Knight();
-    knight.getMoves(rowIndex, columnIndex, board);
+    throw Error("BASE PIECE GET MOVES");
   }
 }
 
@@ -162,9 +167,10 @@ class Queen extends Piece {
   }
 
   getMoves = (rowIndex, columnIndex, board) => {
-    return this.getDiagonalMoves(rowIndex, columnIndex, board, ROW_SIZE).concat(
-      this.getStraightMoves(rowIndex, columnIndex, board, ROW_SIZE)
-    );
+    const diag = this.getDiagonalMoves(rowIndex, columnIndex, board, ROW_SIZE);
+    const strg = this.getStraightMoves(rowIndex, columnIndex, board, ROW_SIZE);
+    console.log({ diag, strg });
+    return diag.concat(strg);
   };
 }
 
@@ -184,12 +190,6 @@ class Pawn extends Piece {
   constructor(color) {
     super(PIECES.PAWN, color);
   }
-
-  createHtmlElement() {
-    this.htmlElement = document.createElement("img");
-    this.htmlElement.setAttribute("id", `${this.name}_${this.color}`);
-    this.htmlElement.src = `images/${this.color}_${this.name}.png`;
-  }
   getMoves(rowIndex, columnIndex, board) {
     const moves = [];
     let cell = board.getCell(rowIndex, columnIndex);
@@ -201,19 +201,22 @@ class Pawn extends Piece {
         }
         if (columnIndex + 1 <= 7) {
           cell = board.getCell(rowIndex + 1, columnIndex + 1);
-          if (cell.piece.color !== this.color) {
-            moves.push(cell);
+          if (!cell.isEmpty()) {
+            if (cell.isOtherPlayerCell) {
+              moves.push(cell);
+            }
           }
         }
         if (columnIndex - 1 >= 0) {
-          cell = board.getCell(rowIndex + 1, columnIndex + -1);
-          if (cell.piece.color !== this.color) {
-            moves.push(cell);
+          cell = board.getCell(rowIndex + 1, columnIndex - 1);
+          if (!cell.isEmpty()) {
+            if (cell.isOtherPlayerCell) {
+              moves.push(cell);
+            }
           }
         }
       }
-    }
-    else {
+    } else {
       if (rowIndex - 1 >= 0) {
         cell = board.getCell(rowIndex - 1, columnIndex);
         if (cell.isEmpty()) {
@@ -221,21 +224,26 @@ class Pawn extends Piece {
         }
         if (columnIndex + 1 <= 7) {
           cell = board.getCell(rowIndex - 1, columnIndex + 1);
-          if (cell.getPieceColor() !== this.color) {
-            moves.push(cell);
+          if (!cell.isEmpty()) {
+            if (cell.isOtherPlayerCell) {
+              moves.push(cell);
+            }
           }
         }
         if (columnIndex - 1 >= 0) {
-          cell = board.getCell(rowIndex - 1, columnIndex + -1);
-          if (cell.getPieceColor() !== this.color) {
-            moves.push(cell);
+          cell = board.getCell(rowIndex - 1, columnIndex - 1);
+          if (!cell.isEmpty()) {
+            if (cell.isOtherPlayerCell) {
+              moves.push(cell);
+            }
           }
         }
       }
     }
+    console.log({ moves });
+    return moves;
   }
 }
-
 
 class Knight extends Piece {
   constructor(color) {
@@ -338,7 +346,6 @@ class Cell {
     this.rowIndex = rowIndex;
     this.columnIndex = columnIndex;
     this.isAvailable = isAvailable;
-    this.piece = piece;
     this.onCellClicked = onCellClicked;
     this.piece = piece;
 
@@ -353,7 +360,6 @@ class Cell {
   }
 
   getPieceColor() {
-    console.log(this);
     return this.piece.color;
   }
 
@@ -375,6 +381,7 @@ class Cell {
       this.htmlElement.appendChild(this.piece.htmlElement);
       this.htmlElement.onclick = () => this.onClick();
     }
+    return this.htmlElement;
   }
 
   updateSelected() {
@@ -426,15 +433,32 @@ class Board {
       if (this.selectedCell !== cell) {
         this.selectedCell.isSelected = false;
         this.selectedCell.updateSelected();
+
+        this.selectedCell = cell;
+        // this.selectedCell.isSelected = true;
+        // this.selectedCell.updateSelected();
+
+        const moves = this.selectedCell.piece.getMoves(
+          this.selectedCell.rowIndex,
+          this.selectedCell.columnIndex,
+          this
+        );
+        console.log(moves);
+      } else if (this.selectedCell === cell) {
+        if (!this.selectedCell.isSelected) {
+          this.selectedCell = undefined;
+        }
+        console.log(this.selectedCell === cell);
       }
+    } else {
+      this.selectedCell = cell;
+      const moves = this.selectedCell.piece.getMoves(
+        this.selectedCell.rowIndex,
+        this.selectedCell.columnIndex,
+        this
+      );
+      console.log(moves);
     }
-    this.selectedCell = cell;
-    const moves = this.selectedCell.piece.getMoves(
-      this.selectedCell.rowIndex,
-      this.selectedCell.columnIndex,
-      this
-    );
-    console.log({ moves });
   };
 
   createBoard() {
@@ -447,6 +471,10 @@ class Board {
       let htmlTr = document.createElement("tr");
       const boardRowArray = [];
       for (let columnIndex = 0; columnIndex < ROW_SIZE; columnIndex++) {
+        // const pieceName =
+        //   rowIndex === 5 && columnIndex === 6
+        //     ? PIECES.KNIGHT
+        //     : this.getChessPieceName(rowIndex, columnIndex);
         const pieceFactory = PieceFactory();
         const piece = pieceFactory.createPiece(rowIndex, columnIndex);
         const cell = new Cell(
@@ -460,7 +488,6 @@ class Board {
         htmlTr.appendChild(cell.htmlElement);
       }
       this.board.push(boardRowArray);
-      console.log({ boardRowArray });
       tbody.appendChild(htmlTr);
     }
   }
@@ -491,7 +518,7 @@ const PieceFactory = () => {
     const color = this.getRowColor(rowIndex);
     switch (pieceName.toUpperCase()) {
       case PIECES.BISHOP:
-        return new Piece(PIECES.BISHOP, color);
+        return new Bishop(color);
       case PIECES.KING:
         return new King(color);
       case PIECES.KNIGHT:
