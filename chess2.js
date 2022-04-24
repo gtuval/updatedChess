@@ -131,11 +131,29 @@ class Piece {
     return moves;
   };
 
-  getMoves(rowIndex, columnIndex, board) {
-    const knight = new KNIGHT();
-    knight.getMoves(rowIndex, columnIndex, board)
-  };
 
+  GetPieceMove = (type) => {
+    let tool;
+    if (type === "ROOK") {
+      tool = new Rook();
+    }
+    else if (type === "BISHOP") {
+      tool = new BISHOP();
+    }
+    else if (type === "KNIGHT") {
+      tool = new KNIGHT();
+    }
+    else if (type === "PAWN") {
+      tool = new PAWN();
+    }
+    else if (type === "QUEEN") {
+      tool = new QUEEN();
+    }
+    else if (type === "KING") {
+      tool = new KING();
+    }
+    tool.getMoves(rowIndex, columnIndex, board);
+  };
 }
 
 class Rook extends Piece {
@@ -172,18 +190,56 @@ class KING extends Piece {
 }
 
 class PAWN extends Piece {
-  constructor() { }
-
+  constructor() { super() }
+  getMoves(rowIndex, columnIndex, board) {
+    const moves = [];
+    let cell = board.getCell(rowIndex, columnIndex);
+    if (cell.getPieceColor() == FIRST_PLAYER_COLOR) {
+      if (rowIndex + 1 <= 7) {
+        cell = board.getCell(rowIndex + 1, columnIndex);
+        if (cell.isEmpty()) {
+          moves.push(cell);
+        }
+        if (columnIndex + 1 <= 7) {
+          cell = board.getCell(rowIndex + 1, columnIndex + 1);
+          if (cell.getPieceColor() !== this.color) {
+            moves.push(cell);
+          }
+        }
+        if (columnIndex - 1 >= 0) {
+          cell = board.getCell(rowIndex + 1, columnIndex + -1);
+          if (cell.getPieceColor() !== this.color) {
+            moves.push(cell);
+          }
+        }
+      }
+    }
+    else {
+      if (rowIndex - 1 >= 0) {
+        cell = board.getCell(rowIndex - 1, columnIndex);
+        if (cell.isEmpty()) {
+          moves.push(cell);
+        }
+        if (columnIndex + 1 <= 7) {
+          cell = board.getCell(rowIndex - 1, columnIndex + 1);
+          if (cell.getPieceColor() !== this.color) {
+            moves.push(cell);
+          }
+        }
+        if (columnIndex - 1 >= 0) {
+          cell = board.getCell(rowIndex - 1, columnIndex + -1);
+          if (cell.getPieceColor() !== this.color) {
+            moves.push(cell);
+          }
+        }
+      }
+    }
+  }
 }
 
 class KNIGHT extends Piece {
   constructor() { super() }
-  inBoard(rowIndex, columnIndex) {
-    if (rowIndex >= 0 && rowIndex <= 7 && columnIndex >= 0 && columnIndex <= 7) {
-      return true;
-    }
-    return false;
-  }
+
   getMoves(rowIndex, columnIndex, board) {
     const row2 = rowIndex + 2;
     const row_2 = rowIndex - 2;
@@ -195,7 +251,7 @@ class KNIGHT extends Piece {
     const col_2 = columnIndex - 2;
     const moves = [];
     let cell = board.getCell(rowIndex, columnIndex);
-    if (this.inBoard(row_2, col1)) {
+    if (cell.inBoard(row_2, col1)) {
       cell = board.getCell(row_2, col1);
       if (cell.isEmpty()) {
         moves.push(cell);
@@ -205,7 +261,7 @@ class KNIGHT extends Piece {
       }
     }
 
-    if (this.inBoard(row_2, col_1)) {
+    if (cell.inBoard(row_2, col_1)) {
       cell = board.getCell(row_2, col_1);
       if (cell.isEmpty()) {
         moves.push(cell);
@@ -214,7 +270,7 @@ class KNIGHT extends Piece {
         moves.push(cell);
       }
     }
-    if (this.inBoard(row_1, col2)) {
+    if (cell.inBoard(row_1, col2)) {
       cell = board.getCell(row_1, col2);
       if (cell.isEmpty()) {
         moves.push(cell);
@@ -223,7 +279,7 @@ class KNIGHT extends Piece {
         moves.push(cell);
       }
     }
-    if (this.inBoard(row_1, col_2)) {
+    if (cell.inBoard(row_1, col_2)) {
       cell = board.getCell(row_1, col_2);
       if (cell.isEmpty()) {
         moves.push(cell);
@@ -232,10 +288,10 @@ class KNIGHT extends Piece {
         moves.push(cell);
       }
     }
-    if (this.inBoard(row2, col1)) {
+    if (cell.inBoard(row2, col1)) {
       cell = board.getCell(row2, col1);
       console.log(this.color);
-      console.log (cell.getPieceColor());
+      console.log(cell.getPieceColor());
       if (cell.isEmpty()) {
         moves.push(cell);
       }
@@ -243,7 +299,7 @@ class KNIGHT extends Piece {
         moves.push(cell);
       }
     }
-    if (this.inBoard(row2, col_1)) {
+    if (cell.inBoard(row2, col_1)) {
       cell = board.getCell(row2, col_1);
       if (cell.isEmpty()) {
         moves.push(cell);
@@ -252,7 +308,7 @@ class KNIGHT extends Piece {
         moves.push(cell);
       }
     }
-    if (this.inBoard(row1, col2)) {
+    if (cell.inBoard(row1, col2)) {
       cell = board.getCell(row1, col2);
       if (cell.isEmpty()) {
         moves.push(cell);
@@ -261,7 +317,7 @@ class KNIGHT extends Piece {
         moves.push(cell);
       }
     }
-    if (this.inBoard(row1, col_2)) {
+    if (cell.inBoard(row1, col_2)) {
       cell = board.getCell(row1, col_2);
       if (cell.isEmpty()) {
         moves.push(cell);
@@ -294,6 +350,12 @@ class Cell {
       this.piece = new Piece(this.chessPieceName, color);
     }
     this.createHtmlElement();
+  }
+  inBoard(rowIndex, columnIndex) {
+    if (rowIndex >= 0 && rowIndex <= 7 && columnIndex >= 0 && columnIndex <= 7) {
+      return true;
+    }
+    return false;
   }
 
   isEmpty() {
