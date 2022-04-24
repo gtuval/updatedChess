@@ -199,6 +199,12 @@ class Pawn extends Piece {
         if (cell.isEmpty()) {
           moves.push(cell);
         }
+        if(rowIndex==1){
+          cell=board.getCell(rowIndex+2,columnIndex);
+          if(cell.isEmpty){
+            moves.push(cell);
+          }
+        }
         if (columnIndex + 1 <= 7) {
           cell = board.getCell(rowIndex + 1, columnIndex + 1);
           if (!cell.isEmpty()) {
@@ -221,6 +227,12 @@ class Pawn extends Piece {
         cell = board.getCell(rowIndex - 1, columnIndex);
         if (cell.isEmpty()) {
           moves.push(cell);
+        }
+        if(rowIndex==6){
+          cell=board.getCell(rowIndex-2,columnIndex);
+          if(cell.isEmpty){
+            moves.push(cell);
+          }
         }
         if (columnIndex + 1 <= 7) {
           cell = board.getCell(rowIndex - 1, columnIndex + 1);
