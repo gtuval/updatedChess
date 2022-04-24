@@ -463,6 +463,7 @@ class Board {
 
       } else if (this.selectedCell === cell) {
         if (!this.selectedCell.isSelected) {
+          this.updateToUnAvailible(relatArray);
           this.selectedCell = undefined;
         }
       }
@@ -477,7 +478,6 @@ class Board {
       relatArray=[...moves];
     }
     this.colorAllCells(relatArray);
-    this.updateToUnAvailible(relatArray);
   }
 
   updateToAvailible(moves) {
