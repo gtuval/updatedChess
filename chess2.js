@@ -41,12 +41,37 @@ const PIECES = {
   
       this.createHtmlElement();
     }
+<<<<<<< HEAD
   
     createHtmlElement() {
       console.log(`${this.name}_${this.color}`);
       this.htmlElement = document.createElement("img");
       this.htmlElement.setAttribute("id", `${this.name}_${this.color}`);
       this.htmlElement.src = `images/${this.color}_${this.name}.png`;
+=======
+}
+let isEmpty = true;
+let savedSquare = undefined;
+let squareTo;
+let toolTo;
+let isclicked = false;
+const RowSize = '8';
+const SquareArr = [];
+SquareArr[0] = undefined;
+const firstRowColor = 'white';
+const toolRows = [1, 2, 7, 8];
+const lastRowColor = firstRowColor === 'black' ? 'white' : 'black';
+const ToolNames = ["rook", "knight", "bishop", "king", "queen", "bishop", "knight", "rook"];
+const avalibleSquareColor = "#def2c4";
+const SelectedSquareColor = "#ffe4ab";
+let selectedSqure;;
+let tool;
+
+
+const getChessToolOnStart = (rowIndex, columnIndex) => {
+    if (rowIndex === 2 || rowIndex === 7) {
+        return "pawn";
+>>>>>>> 831415c36524b8f10f44bb958e126d5f2eea60ad
     }
   
     getStraightMoves = (rowIndex, columnIndex, board, maxMoves) => {
@@ -135,12 +160,83 @@ const PIECES = {
       }
       this.createHtmlElement();
     }
+<<<<<<< HEAD
   
     isEmpty() {
       if (this.piece) {
         return false;
       }
       return true;
+=======
+    return lastRowColor;
+}
+
+const getIndex = (rowIndex, columnIndex) => {
+    return (8 * (rowIndex - 1) + columnIndex);
+}
+
+
+function startGame() {
+    let table = document.createElement('table');
+    let tbody = document.createElement('tbody');
+    table.appendChild(tbody);
+    document.body.appendChild(table);
+    for (let rowIndex = 1; rowIndex <= RowSize; rowIndex++) {
+        toolTo = undefined;
+        isEmpty = true;
+        let row = document.createElement('tr');
+        color = getRowColor(rowIndex);
+        for (let columnIndex = 1; columnIndex <= RowSize; columnIndex++) {
+            let square = document.createElement('td');
+            tool = getChessToolOnStart(rowIndex, columnIndex);
+            if (toolRows.indexOf(rowIndex) !== -1) {
+                let toolImg = document.createElement('img');
+                toolImg.setAttribute('id', `${tool}_${color}`);
+                toolTo = new Tool(tool, color);
+                toolImg.src = `images/${color}_${tool}.png`;
+                square.setAttribute(`id`, `${rowIndex}_${columnIndex}`);
+                square.appendChild(toolImg);
+                isEmpty = false;
+            };
+            squareTo = new Square(square, rowIndex, columnIndex, false, isEmpty, toolTo);
+            SquareArr.push(squareTo);
+            square.onclick = () => {
+                selectedSqure = SquareArr[getIndex(rowIndex, columnIndex)];
+                if (savedSquare != undefined) {
+                    if (savedSquare == selectedSqure) {
+                        isclicked =!isclicked;
+                    }
+                    else {
+                        isclicked = false;
+                    }
+                }
+                savedSquare = selectedSqure;
+                if (!isclicked) {
+                    if (selectedSqure.empty == false) {
+                        switch (selectedSqure.tool.name) {
+                            case 'rook': RookAvailible(rowIndex, columnIndex);
+                                break;
+                            case 'bishop': bishopAvailible(rowIndex, columnIndex);
+                                break;
+                            case 'queen': QueenAvailible(rowIndex, columnIndex);
+                                break;
+                            case 'king': KingAvailible(rowIndex, columnIndex);
+                                break;
+                            case 'pawn': PawnAvailible(rowIndex, columnIndex, selectedSqure.tool.color);
+                                break;
+                        }
+                    }
+                }
+                else{
+                    ResetAvalible();
+                }
+                ColorAll();
+                selectedSqure.square.style.backgroundColor = SelectedSquareColor;
+            }
+            row.appendChild(square);
+        }
+        tbody.appendChild(row);
+>>>>>>> 831415c36524b8f10f44bb958e126d5f2eea60ad
     }
   
     getPieceColor() {
@@ -173,6 +269,7 @@ const PIECES = {
         this.htmlElement.onclick = this.onClick;
       }
     }
+<<<<<<< HEAD
   
     updateSelected() {
       if (this.isSelected) {
@@ -189,6 +286,47 @@ const PIECES = {
       } else {
         this.htmlElement.style.backgroundColor = COLORS.NOT_AVAILABLE;
       }
+=======
+}
+
+const PawnAvailible = (rowIndex, columnIndex, color) => {
+    for (let i = 1; i < SquareArr.length; i++) {
+        if (color == 'black') {
+            if (parseInt(SquareArr[i].rowIndex) == parseInt(rowIndex - 1) && SquareArr[i].columnIndex == columnIndex) {
+                SquareArr[i].avalibleToStepOn = true;
+            }
+            else {
+                SquareArr[i].avalibleToStepOn = false;
+            }
+        }
+        else {
+            if (parseInt(SquareArr[i].rowIndex) == parseInt(rowIndex + 1) && SquareArr[i].columnIndex == columnIndex) {
+                SquareArr[i].avalibleToStepOn = true;
+            }
+            else {
+                SquareArr[i].avalibleToStepOn = false;
+            }
+        }
+    }
+}
+
+const KnightAvailible = (rowIndex, columnIndex) => {
+
+}
+const ResetAvalible = () => {
+    for (let i = 1; i < SquareArr.length; i++) {
+        SquareArr[i].avalibleToStepOn = false;
+    }
+}
+const ColorAll = () => {
+    for (let i = 1; i < SquareArr.length; i++) {
+        if (SquareArr[i].avalibleToStepOn == true) {
+            SquareArr[i].square.style.backgroundColor = avalibleSquareColor;
+        }
+        else {
+            SquareArr[i].square.style.backgroundColor = '';
+        }
+>>>>>>> 831415c36524b8f10f44bb958e126d5f2eea60ad
     }
   
     isCellAvailableForMove(rowIndex, columnIndex) {
