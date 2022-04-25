@@ -367,9 +367,6 @@ class Cell {
     }
     return true;
   }
-  updatecell(){
-
-  }
 
   getPieceColor() {
     return this.piece.color;
@@ -442,19 +439,22 @@ class Board {
     return this.board[rowIndex][columnIndex];
   };
   movePiece = (cell) => {
-    if (cell.isAvailable) {
-      const selectedImg=this.selectedCell.piece.htmlElement;
-      cell.isAVAILABLE=false;
-      cell.piece=Object.assign(this.selectedCell.piece);
-      cell.htmlElement.appendChild(selectedImg);
-      this.selectedCell.piece=undefined;
-      cell
+    if (!cell.isEmpty()) {
+      if (cell.isOtherPlayerCell) {
+        cell.htmlElement.removeChild(cell.piece.htmlElement);
+        cell.piece = undefined;
+      }
     }
+    const selectedImg = this.selectedCell.piece.htmlElement;
+    cell.isAVAILABLE = false;
+    cell.piece = Object.assign(this.selectedCell.piece);
+    cell.htmlElement.appendChild(selectedImg);
+    this.selectedCell.piece = undefined;
   };
 
 
   onCellClicked = (cell) => {
-    if (!cell.isEmpty()) {
+    if (!cell.isAvailable) {
       if (this.selectedCell) {
         //if its not first time
         if (this.selectedCell !== cell) {
@@ -497,7 +497,7 @@ class Board {
       this.updateToUnAvailible(relatArray);
       this.selectedCell.isSelected = false;
       this.selectedCell.updateSelected();
-      this.selectedCell=undefined;
+      this.selectedCell = undefined;
     }
     this.colorAllCells(relatArray);
   }
