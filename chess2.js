@@ -442,7 +442,12 @@ class Board {
     if (!cell.isEmpty()) {
       if (cell.isOtherPlayerCell) {
         if (cell.piece.name == PIECES.KING) {
-          alert("game over");
+          if (confirm("CheckMate, do you want to restart?") == true) {
+            location.reload();
+          }
+          else {
+            window.close();
+          }
         }
         cell.htmlElement.removeChild(cell.piece.htmlElement);
         cell.piece = undefined;
@@ -453,15 +458,8 @@ class Board {
     cell.piece = Object.assign(this.selectedCell.piece);
     cell.htmlElement.appendChild(selectedImg);
     this.selectedCell.piece = undefined;
-    countSteps++;
   };
 
-  playerOneTurn = () => {
-    if (countSteps % 2 == 0) {
-      return true;
-    }
-    return false;
-  }
 
   onCellClicked = (cell) => {
     if (!cell.isAvailable) {
@@ -521,51 +519,51 @@ class Board {
     this.colorAllCells(relatArray);
   }
 
-updateToAvailible(moves) {
-  for (let index = 0; index < moves.length; index++) {
-    moves[index].isAvailable = true;
-  }
-};
-
-updateToUnAvailible(moves) {
-  for (let index = 0; index < moves.length; index++) {
-    moves[index].isAvailable = false;
-  }
-};
-
-colorAllCells(moves) {
-  for (let index = 0; index < moves.length; index++) {
-    moves[index].updateAvailable();
-  }
-};
-
-
-createBoard() {
-  let table = document.createElement("table");
-  let tbody = document.createElement("tbody");
-  table.appendChild(tbody);
-  document.body.appendChild(table);
-
-  for (let rowIndex = 0; rowIndex < ROW_SIZE; rowIndex++) {
-    let htmlTr = document.createElement("tr");
-    const boardRowArray = [];
-    for (let columnIndex = 0; columnIndex < ROW_SIZE; columnIndex++) {
-      const pieceFactory = PieceFactory();
-      const piece = pieceFactory.createPiece(rowIndex, columnIndex);
-      const cell = new Cell(
-        rowIndex,
-        columnIndex,
-        false,
-        piece,
-        this.onCellClicked
-      );
-      boardRowArray.push(cell);
-      htmlTr.appendChild(cell.htmlElement);
+  updateToAvailible(moves) {
+    for (let index = 0; index < moves.length; index++) {
+      moves[index].isAvailable = true;
     }
-    this.board.push(boardRowArray);
-    tbody.appendChild(htmlTr);
+  };
+
+  updateToUnAvailible(moves) {
+    for (let index = 0; index < moves.length; index++) {
+      moves[index].isAvailable = false;
+    }
+  };
+
+  colorAllCells(moves) {
+    for (let index = 0; index < moves.length; index++) {
+      moves[index].updateAvailable();
+    }
+  };
+
+
+  createBoard() {
+    let table = document.createElement("table");
+    let tbody = document.createElement("tbody");
+    table.appendChild(tbody);
+    document.body.appendChild(table);
+
+    for (let rowIndex = 0; rowIndex < ROW_SIZE; rowIndex++) {
+      let htmlTr = document.createElement("tr");
+      const boardRowArray = [];
+      for (let columnIndex = 0; columnIndex < ROW_SIZE; columnIndex++) {
+        const pieceFactory = PieceFactory();
+        const piece = pieceFactory.createPiece(rowIndex, columnIndex);
+        const cell = new Cell(
+          rowIndex,
+          columnIndex,
+          false,
+          piece,
+          this.onCellClicked
+        );
+        boardRowArray.push(cell);
+        htmlTr.appendChild(cell.htmlElement);
+      }
+      this.board.push(boardRowArray);
+      tbody.appendChild(htmlTr);
+    }
   }
-}
 }
 
 const PieceFactory = () => {
