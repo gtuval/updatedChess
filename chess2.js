@@ -6,7 +6,7 @@ const PIECES = {
   KING: "KING",
   PAWN: "PAWN",
 };
-
+let countSteps = 0;
 const COLORS = {
   NOT_AVAILABLE: "",
   AVAILABLE: "#def2c4",
@@ -127,7 +127,7 @@ class Piece {
         downRightDirection = this.checkOptions(cell, moves);
       }
       //check down left
-      if (!downLeftDirection && downRowIndex <= 7 && rightColumnIndex >= 0) {
+      if (!downLeftDirection && downRowIndex <= 7 && leftColumnIndex >= 0) {
         const cell = board.getCell(downRowIndex, leftColumnIndex);
         downLeftDirection = this.checkOptions(cell, moves);
       }
@@ -200,14 +200,14 @@ class Pawn extends Piece {
         }
         if (rowIndex == 1) {
           cell = board.getCell(rowIndex + 2, columnIndex);
-          if (cell.isEmpty) {
+          if (cell.isEmpty()) {
             moves.push(cell);
           }
         }
         if (columnIndex + 1 <= 7) {
           cell = board.getCell(rowIndex + 1, columnIndex + 1);
           if (!cell.isEmpty()) {
-            if (cell.isOtherPlayerCell) {
+            if (cell.isOtherPlayerCell(rowIndex, columnIndex, board)) {
               moves.push(cell);
             }
           }
@@ -215,7 +215,7 @@ class Pawn extends Piece {
         if (columnIndex - 1 >= 0) {
           cell = board.getCell(rowIndex + 1, columnIndex - 1);
           if (!cell.isEmpty()) {
-            if (cell.isOtherPlayerCell) {
+            if (cell.isOtherPlayerCell(rowIndex, columnIndex, board)) {
               moves.push(cell);
             }
           }
@@ -229,14 +229,14 @@ class Pawn extends Piece {
         }
         if (rowIndex == 6) {
           cell = board.getCell(rowIndex - 2, columnIndex);
-          if (cell.isEmpty) {
+          if (cell.isEmpty()) {
             moves.push(cell);
           }
         }
         if (columnIndex + 1 <= 7) {
           cell = board.getCell(rowIndex - 1, columnIndex + 1);
           if (!cell.isEmpty()) {
-            if (cell.isOtherPlayerCell) {
+            if (cell.isOtherPlayerCell(rowIndex, columnIndex, board)) {
               moves.push(cell);
             }
           }
@@ -244,7 +244,7 @@ class Pawn extends Piece {
         if (columnIndex - 1 >= 0) {
           cell = board.getCell(rowIndex - 1, columnIndex - 1);
           if (!cell.isEmpty()) {
-            if (cell.isOtherPlayerCell) {
+            if (cell.isOtherPlayerCell(rowIndex, columnIndex, board)) {
               moves.push(cell);
             }
           }
@@ -441,6 +441,9 @@ class Board {
   movePiece = (cell) => {
     if (!cell.isEmpty()) {
       if (cell.isOtherPlayerCell) {
+        if (cell.piece.name == PIECES.KING) {
+          alert("game over");
+        }
         cell.htmlElement.removeChild(cell.piece.htmlElement);
         cell.piece = undefined;
       }
@@ -450,8 +453,15 @@ class Board {
     cell.piece = Object.assign(this.selectedCell.piece);
     cell.htmlElement.appendChild(selectedImg);
     this.selectedCell.piece = undefined;
+    countSteps++;
   };
 
+  playerOneTurn = () => {
+    if (countSteps % 2 == 0) {
+      return true;
+    }
+    return false;
+  }
 
   onCellClicked = (cell) => {
     if (!cell.isAvailable) {
@@ -463,16 +473,22 @@ class Board {
           this.selectedCell.updateSelected();
           this.selectedCell = cell;
           console.log(this.selectedCell.piece);
-          const moves = this.selectedCell.piece.getMoves(
-            this.selectedCell.rowIndex,
-            this.selectedCell.columnIndex,
-            this
-          );
-          this.updateToUnAvailible(relatArray);
-          this.colorAllCells(relatArray);
-          this.updateToAvailible(moves);
-          this.colorAllCells(moves);
-          relatArray = [...moves]
+          if (this.selectedCell.piece) {
+            const moves = this.selectedCell.piece.getMoves(
+              this.selectedCell.rowIndex,
+              this.selectedCell.columnIndex,
+              this
+            );
+            this.updateToUnAvailible(relatArray);
+            this.colorAllCells(relatArray);
+            this.updateToAvailible(moves);
+            this.colorAllCells(moves);
+            relatArray = [...moves]
+          }
+          else {
+            this.updateToUnAvailible(relatArray);
+            this.selectedCell = undefined;
+          }
         } else if (this.selectedCell === cell) {
           // if cell cancled
           if (!this.selectedCell.isSelected) {
@@ -482,12 +498,15 @@ class Board {
         }
       } else if (!cell.isEmpty()) {
         // if its first time
+
         this.selectedCell = cell;
         const moves = this.selectedCell.piece.getMoves(
           this.selectedCell.rowIndex,
           this.selectedCell.columnIndex,
           this
         );
+        this.selectedCell.isSelected = true;
+        this.selectedCell.updateSelected();
         this.updateToAvailible(moves);
         relatArray = [...moves];
       }
@@ -502,55 +521,51 @@ class Board {
     this.colorAllCells(relatArray);
   }
 
-  updateToAvailible(moves) {
-    for (let index = 0; index < moves.length; index++) {
-      moves[index].isAvailable = true;
-    }
-  };
-
-  updateToUnAvailible(moves) {
-    for (let index = 0; index < moves.length; index++) {
-      moves[index].isAvailable = false;
-    }
-  };
-
-  colorAllCells(moves) {
-    for (let index = 0; index < moves.length; index++) {
-      moves[index].updateAvailable();
-    }
-  };
-
-
-  createBoard() {
-    let table = document.createElement("table");
-    let tbody = document.createElement("tbody");
-    table.appendChild(tbody);
-    document.body.appendChild(table);
-
-    for (let rowIndex = 0; rowIndex < ROW_SIZE; rowIndex++) {
-      let htmlTr = document.createElement("tr");
-      const boardRowArray = [];
-      for (let columnIndex = 0; columnIndex < ROW_SIZE; columnIndex++) {
-        // const pieceName =
-        //   rowIndex === 5 && columnIndex === 6
-        //     ? PIECES.KNIGHT
-        //     : this.getChessPieceName(rowIndex, columnIndex);
-        const pieceFactory = PieceFactory();
-        const piece = pieceFactory.createPiece(rowIndex, columnIndex);
-        const cell = new Cell(
-          rowIndex,
-          columnIndex,
-          false,
-          piece,
-          this.onCellClicked
-        );
-        boardRowArray.push(cell);
-        htmlTr.appendChild(cell.htmlElement);
-      }
-      this.board.push(boardRowArray);
-      tbody.appendChild(htmlTr);
-    }
+updateToAvailible(moves) {
+  for (let index = 0; index < moves.length; index++) {
+    moves[index].isAvailable = true;
   }
+};
+
+updateToUnAvailible(moves) {
+  for (let index = 0; index < moves.length; index++) {
+    moves[index].isAvailable = false;
+  }
+};
+
+colorAllCells(moves) {
+  for (let index = 0; index < moves.length; index++) {
+    moves[index].updateAvailable();
+  }
+};
+
+
+createBoard() {
+  let table = document.createElement("table");
+  let tbody = document.createElement("tbody");
+  table.appendChild(tbody);
+  document.body.appendChild(table);
+
+  for (let rowIndex = 0; rowIndex < ROW_SIZE; rowIndex++) {
+    let htmlTr = document.createElement("tr");
+    const boardRowArray = [];
+    for (let columnIndex = 0; columnIndex < ROW_SIZE; columnIndex++) {
+      const pieceFactory = PieceFactory();
+      const piece = pieceFactory.createPiece(rowIndex, columnIndex);
+      const cell = new Cell(
+        rowIndex,
+        columnIndex,
+        false,
+        piece,
+        this.onCellClicked
+      );
+      boardRowArray.push(cell);
+      htmlTr.appendChild(cell.htmlElement);
+    }
+    this.board.push(boardRowArray);
+    tbody.appendChild(htmlTr);
+  }
+}
 }
 
 const PieceFactory = () => {
