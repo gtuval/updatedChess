@@ -14,7 +14,7 @@ const COLORS = {
   WHITE: "white",
   BLACK: "black",
 };
-let relatArray=[];
+let relatArray = [];
 const ROW_SIZE = 8;
 const PIECES_ORDER = [
   PIECES.ROOK,
@@ -41,7 +41,6 @@ class Piece {
   constructor(name, color) {
     this.name = name;
     this.color = color;
-
     this.createHtmlElement();
   }
 
@@ -199,9 +198,9 @@ class Pawn extends Piece {
         if (cell.isEmpty()) {
           moves.push(cell);
         }
-        if(rowIndex==1){
-          cell=board.getCell(rowIndex+2,columnIndex);
-          if(cell.isEmpty){
+        if (rowIndex == 1) {
+          cell = board.getCell(rowIndex + 2, columnIndex);
+          if (cell.isEmpty) {
             moves.push(cell);
           }
         }
@@ -228,9 +227,9 @@ class Pawn extends Piece {
         if (cell.isEmpty()) {
           moves.push(cell);
         }
-        if(rowIndex==6){
-          cell=board.getCell(rowIndex-2,columnIndex);
-          if(cell.isEmpty){
+        if (rowIndex == 6) {
+          cell = board.getCell(rowIndex - 2, columnIndex);
+          if (cell.isEmpty) {
             moves.push(cell);
           }
         }
@@ -368,14 +367,19 @@ class Cell {
     }
     return true;
   }
+  updatecell(){
+
+  }
 
   getPieceColor() {
     return this.piece.color;
   }
 
   onClick() {
-    this.isSelected = !this.isSelected;
-    this.updateSelected();
+    if (this.piece) {
+      this.isSelected = !this.isSelected;
+      this.updateSelected();
+    }
     if (this.onCellClicked) {
       this.onCellClicked(this);
     }
@@ -383,14 +387,14 @@ class Cell {
 
   createHtmlElement() {
     this.htmlElement = document.createElement("td");
+    this.htmlElement.setAttribute(
+      `id`,
+      `${this.rowIndex}_${this.columnIndex}`
+    );
     if (this.piece) {
-      this.htmlElement.setAttribute(
-        `id`,
-        `${this.rowIndex}_${this.columnIndex}`
-      );
       this.htmlElement.appendChild(this.piece.htmlElement);
-      this.htmlElement.onclick = () => this.onClick();
     }
+    this.htmlElement.onclick = () => this.onClick();
     return this.htmlElement;
   }
 
@@ -437,45 +441,63 @@ class Board {
   getCell = (rowIndex, columnIndex) => {
     return this.board[rowIndex][columnIndex];
   };
+  movePiece = (cell) => {
+    if (cell.isAvailable) {
+      const selectedImg=this.selectedCell.piece.htmlElement;
+      cell.isAVAILABLE=false;
+      cell.piece=Object.assign(this.selectedCell.piece);
+      cell.htmlElement.appendChild(selectedImg);
+      this.selectedCell.piece=undefined;
+      cell
+    }
+  };
+
 
   onCellClicked = (cell) => {
-    if (this.selectedCell) {
-      if (this.selectedCell !== cell) {
-        this.selectedCell.isSelected = false;
-        this.selectedCell.updateSelected();
-
+    if (!cell.isEmpty()) {
+      if (this.selectedCell) {
+        //if its not first time
+        if (this.selectedCell !== cell) {
+          //if cell change
+          this.selectedCell.isSelected = false;
+          this.selectedCell.updateSelected();
+          this.selectedCell = cell;
+          console.log(this.selectedCell.piece);
+          const moves = this.selectedCell.piece.getMoves(
+            this.selectedCell.rowIndex,
+            this.selectedCell.columnIndex,
+            this
+          );
+          this.updateToUnAvailible(relatArray);
+          this.colorAllCells(relatArray);
+          this.updateToAvailible(moves);
+          this.colorAllCells(moves);
+          relatArray = [...moves]
+        } else if (this.selectedCell === cell) {
+          // if cell cancled
+          if (!this.selectedCell.isSelected) {
+            this.updateToUnAvailible(relatArray);
+            this.selectedCell = undefined;
+          }
+        }
+      } else if (!cell.isEmpty()) {
+        // if its first time
         this.selectedCell = cell;
-        // this.selectedCell.isSelected = true;
-        // this.selectedCell.updateSelected();
-
         const moves = this.selectedCell.piece.getMoves(
           this.selectedCell.rowIndex,
           this.selectedCell.columnIndex,
           this
-
         );
-        this.updateToUnAvailible(relatArray);
-        this.colorAllCells(relatArray);
         this.updateToAvailible(moves);
-        this.colorAllCells(moves);
-        
-        relatArray=[...moves]
-
-      } else if (this.selectedCell === cell) {
-        if (!this.selectedCell.isSelected) {
-          this.updateToUnAvailible(relatArray);
-          this.selectedCell = undefined;
-        }
+        relatArray = [...moves];
       }
-    } else {
-      this.selectedCell = cell;
-      const moves = this.selectedCell.piece.getMoves(
-        this.selectedCell.rowIndex,
-        this.selectedCell.columnIndex,
-        this
-      );
-      this.updateToAvailible(moves);
-      relatArray=[...moves];
+    }
+    else {
+      this.movePiece(cell);
+      this.updateToUnAvailible(relatArray);
+      this.selectedCell.isSelected = false;
+      this.selectedCell.updateSelected();
+      this.selectedCell=undefined;
     }
     this.colorAllCells(relatArray);
   }
@@ -499,36 +521,36 @@ class Board {
   };
 
 
-createBoard() {
-  let table = document.createElement("table");
-  let tbody = document.createElement("tbody");
-  table.appendChild(tbody);
-  document.body.appendChild(table);
+  createBoard() {
+    let table = document.createElement("table");
+    let tbody = document.createElement("tbody");
+    table.appendChild(tbody);
+    document.body.appendChild(table);
 
-  for (let rowIndex = 0; rowIndex < ROW_SIZE; rowIndex++) {
-    let htmlTr = document.createElement("tr");
-    const boardRowArray = [];
-    for (let columnIndex = 0; columnIndex < ROW_SIZE; columnIndex++) {
-      // const pieceName =
-      //   rowIndex === 5 && columnIndex === 6
-      //     ? PIECES.KNIGHT
-      //     : this.getChessPieceName(rowIndex, columnIndex);
-      const pieceFactory = PieceFactory();
-      const piece = pieceFactory.createPiece(rowIndex, columnIndex);
-      const cell = new Cell(
-        rowIndex,
-        columnIndex,
-        false,
-        piece,
-        this.onCellClicked
-      );
-      boardRowArray.push(cell);
-      htmlTr.appendChild(cell.htmlElement);
+    for (let rowIndex = 0; rowIndex < ROW_SIZE; rowIndex++) {
+      let htmlTr = document.createElement("tr");
+      const boardRowArray = [];
+      for (let columnIndex = 0; columnIndex < ROW_SIZE; columnIndex++) {
+        // const pieceName =
+        //   rowIndex === 5 && columnIndex === 6
+        //     ? PIECES.KNIGHT
+        //     : this.getChessPieceName(rowIndex, columnIndex);
+        const pieceFactory = PieceFactory();
+        const piece = pieceFactory.createPiece(rowIndex, columnIndex);
+        const cell = new Cell(
+          rowIndex,
+          columnIndex,
+          false,
+          piece,
+          this.onCellClicked
+        );
+        boardRowArray.push(cell);
+        htmlTr.appendChild(cell.htmlElement);
+      }
+      this.board.push(boardRowArray);
+      tbody.appendChild(htmlTr);
     }
-    this.board.push(boardRowArray);
-    tbody.appendChild(htmlTr);
   }
-}
 }
 
 const PieceFactory = () => {
