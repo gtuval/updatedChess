@@ -454,7 +454,7 @@ class Board {
       this.isSecondPlayerTurn() && cell.piece.color == SECOND_PLAYER_COLOR) {
       return true;
     }
-    cell.isAvailable=false;
+    cell.isAvailable = false;
     cell.updateAvailable();
     alert("not your turn");
     return false;
@@ -484,9 +484,21 @@ class Board {
     cell.htmlElement.appendChild(selectedImg);
     this.selectedCell.piece = undefined;
     countSteps++;
+    if (this.kingIsCheck(cell.piece.getMoves(cell.rowIndex, cell.columnIndex, this))) {
+      alert("CHECK");
+    }
   };
 
-
+  kingIsCheck = (moves) => {
+    for (let index = 0; index < moves.length; index++) {
+      if (!moves[index].isEmpty()) {
+        if (moves[index].piece.name == PIECES.KING) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
   onCellClicked = (cell) => {
     if (!cell.isAvailable) {
       if (this.isAbleToMove(cell)) {
