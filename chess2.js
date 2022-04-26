@@ -435,6 +435,31 @@ class Board {
 
   constructor() { }
 
+  isFirstPlayerTurn = () => {
+    if (countSteps % 2 == 0) {
+      return true;
+    }
+    return false;
+  }
+
+  isSecondPlayerTurn = () => {
+    if (countSteps % 2 != 0) {
+      return true;
+    }
+    return false;
+  }
+
+  isAbleToMove = (cell) => {
+    if (this.isFirstPlayerTurn() && cell.piece.color == FIRST_PLAYER_COLOR ||
+      this.isSecondPlayerTurn() && cell.piece.color == SECOND_PLAYER_COLOR) {
+      return true;
+    }
+    cell.isAvailable=false;
+    cell.updateAvailable();
+    alert("not your turn");
+    return false;
+  }
+
   getCell = (rowIndex, columnIndex) => {
     return this.board[rowIndex][columnIndex];
   };
@@ -458,58 +483,59 @@ class Board {
     cell.piece = Object.assign(this.selectedCell.piece);
     cell.htmlElement.appendChild(selectedImg);
     this.selectedCell.piece = undefined;
+    countSteps++;
   };
 
 
   onCellClicked = (cell) => {
     if (!cell.isAvailable) {
-      if (this.selectedCell) {
-        //if its not first time
-        if (this.selectedCell !== cell) {
-          //if cell change
-          this.selectedCell.isSelected = false;
-          this.selectedCell.updateSelected();
+      if (this.isAbleToMove(cell)) {
+        if (this.selectedCell) {
+          //if its not first time
+          if (this.selectedCell !== cell) {
+            //if cell change
+            this.selectedCell.isSelected = false;
+            this.selectedCell.updateSelected();
+            this.selectedCell = cell;
+            console.log(this.selectedCell.piece);
+            if (this.selectedCell.piece) {
+              const moves = this.selectedCell.piece.getMoves(
+                this.selectedCell.rowIndex,
+                this.selectedCell.columnIndex,
+                this
+              );
+              this.updateToUnAvailible(relatArray);
+              this.colorAllCells(relatArray);
+              this.updateToAvailible(moves);
+              this.colorAllCells(moves);
+              relatArray = [...moves]
+            }
+            else {
+              this.updateToUnAvailible(relatArray);
+              this.selectedCell = undefined;
+            }
+          } else if (this.selectedCell === cell) {
+            // if cell cancled
+            if (!this.selectedCell.isSelected) {
+              this.updateToUnAvailible(relatArray);
+              this.selectedCell = undefined;
+            }
+          }
+        } else if (!cell.isEmpty()) {
+          // if its first time
           this.selectedCell = cell;
-          console.log(this.selectedCell.piece);
-          if (this.selectedCell.piece) {
-            const moves = this.selectedCell.piece.getMoves(
-              this.selectedCell.rowIndex,
-              this.selectedCell.columnIndex,
-              this
-            );
-            this.updateToUnAvailible(relatArray);
-            this.colorAllCells(relatArray);
-            this.updateToAvailible(moves);
-            this.colorAllCells(moves);
-            relatArray = [...moves]
-          }
-          else {
-            this.updateToUnAvailible(relatArray);
-            this.selectedCell = undefined;
-          }
-        } else if (this.selectedCell === cell) {
-          // if cell cancled
-          if (!this.selectedCell.isSelected) {
-            this.updateToUnAvailible(relatArray);
-            this.selectedCell = undefined;
-          }
+          const moves = this.selectedCell.piece.getMoves(
+            this.selectedCell.rowIndex,
+            this.selectedCell.columnIndex,
+            this
+          );
+          this.selectedCell.isSelected = true;
+          this.selectedCell.updateSelected();
+          this.updateToAvailible(moves);
+          relatArray = [...moves];
         }
-      } else if (!cell.isEmpty()) {
-        // if its first time
-
-        this.selectedCell = cell;
-        const moves = this.selectedCell.piece.getMoves(
-          this.selectedCell.rowIndex,
-          this.selectedCell.columnIndex,
-          this
-        );
-        this.selectedCell.isSelected = true;
-        this.selectedCell.updateSelected();
-        this.updateToAvailible(moves);
-        relatArray = [...moves];
       }
-    }
-    else {
+    } else {
       this.movePiece(cell);
       this.updateToUnAvailible(relatArray);
       this.selectedCell.isSelected = false;
