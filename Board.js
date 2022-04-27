@@ -17,7 +17,12 @@ class Board {
     }
     return false;
   }
-
+  needAlerthere = (txt) => {
+    const alertxt=document.getElementById('alertTxt');
+    const alertxtbox=document.getElementById('alertBox');
+    alertxtbox.style.display='block';
+    alertxt.innerHTML =txt ;
+  }
   isAbleToMove = (cell) => {
     if (this.isFirstPlayerTurn() && cell.piece.color == FIRST_PLAYER_COLOR ||
       this.isSecondPlayerTurn() && cell.piece.color == SECOND_PLAYER_COLOR) {
@@ -25,7 +30,7 @@ class Board {
     }
     cell.isAvailable = false;
     cell.updateAvailable();
-    alert("not your turn");
+    this.needAlerthere("not your turn");
     return false;
   }
 
@@ -54,7 +59,7 @@ class Board {
     this.selectedCell.piece = undefined;
     countSteps++;
     if (this.kingIsCheck(cell.piece.getMoves(cell.rowIndex, cell.columnIndex, this))) {
-      alert("CHECK");
+      this.needAlerthere("CHECK");
     }
   };
 
@@ -170,5 +175,6 @@ class Board {
       this.board.push(boardRowArray);
       tbody.appendChild(htmlTr);
     }
+    this.needAlerthere(`${FIRST_PLAYER_COLOR} Is First`);
   }
 }

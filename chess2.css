@@ -9,6 +9,8 @@ table{
     width: 700px;
     border: 7px solid black;
     border-spacing: 0px;
+    position: relative;
+    z-index:0;
 }
 td{
     width: 60px;
@@ -28,3 +30,37 @@ tr:nth-child(odd) td:nth-child(even),tr:nth-child(even) td:nth-child(odd)
 tr:nth-child(odd) td:nth-child(even):hover,tr:nth-child(even) td:nth-child(odd):hover,td:hover{
     background: gray;
 }
+/* The alert message box */
+.alert {
+    position: absolute;
+    padding: 30px;
+    background-color: #4c73a0; /* Red */
+    color: white;
+    margin-bottom: 15px;
+    z-index: 1;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+  
+  /* The close button */
+  .closebtn {
+    display: inline-block;
+    vertical-align: middle;
+    white-space: nowrap;
+    margin-left: 20px;
+    color: white;
+    font-weight: bold;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  /* When moving the mouse over the close button */
+  .closebtn:hover {
+    color: black;
+  }
+  .alerttxt{
+    display: inline-block; vertical-align: middle;
+  }
+  
