@@ -37,6 +37,7 @@ const STEPS = {
   WHITE: FIRST_PLAYER_COLOR === COLORS.WHITE ? 1 : -1,
   BLACK: FIRST_PLAYER_COLOR === COLORS.BLACK ? 1 : -1,
 };
+
 const PieceFactory = () => {
   getChessPieceName = (rowIndex, columnIndex) => {
     if (PAWN_INITIAL_ROWS.includes(rowIndex)) {
