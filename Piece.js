@@ -30,7 +30,7 @@ class Piece {
     let leftDirection = false;
     let rightDirection = false;
 
-    for (let index = 1; index <= maxMoves; index++) {
+    for (let index = 1; index < maxMoves; index++) {
       const upRowIndex = rowIndex - index;
       const downRowIndex = rowIndex + index;
       const leftColumnIndex = columnIndex - index;
