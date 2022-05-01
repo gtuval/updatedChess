@@ -26,7 +26,10 @@ const PIECES_ORDER = [
   PIECES.KNIGHT,
   PIECES.ROOK,
 ];
-
+let whiteRookCountSteps=0;
+let BlackRookCountSteps=0;
+let WhiteKingCountSteps=0;
+let BlackKingCountSteps=0;
 const PAWN_INITIAL_ROWS = [1, 6];
 const PIECES_INITIAL_ROWS = [0, 1, 6, 7];
 const FIRST_PLAYER_COLOR_ROWS = [0, 1];

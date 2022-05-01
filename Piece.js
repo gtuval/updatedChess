@@ -138,10 +138,18 @@ class King extends Piece {
     super(PIECES.KING, color);
   }
 
+  casteling = (rowIndex, columnIndex, board) => {
+    const castel = [];
+    if(board.isAbleToCastle(rowIndex,columnIndex))
+     {
+      castel.push(board.getCell(rowIndex, columnIndex - 2));
+    }
+    return castel;
+  }
+
   getMoves = (rowIndex, columnIndex, board) => {
     return this.getDiagonalMoves(rowIndex, columnIndex, board, 2).concat(
-      this.getStraightMoves(rowIndex, columnIndex, board, 2)
-    );
+      this.getStraightMoves(rowIndex, columnIndex, board, 2)).concat(this.casteling(rowIndex, columnIndex, board));
   };
 }
 

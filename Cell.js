@@ -7,6 +7,7 @@ class Cell {
     this.piece = piece;
     this.createHtmlElement();
   }
+  
   isEmpty() {
     if (this.piece) {
       return false;

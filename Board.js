@@ -17,6 +17,14 @@ class Board {
     }
     return false;
   }
+
+  isAbleToCastle =(rowIndex, columnIndex) =>{
+    if (this.getCell(rowIndex, columnIndex - 1).isEmpty() && this.getCell(rowIndex, columnIndex - 2).isEmpty()){
+      return true;
+    }
+    return false;
+  }
+
   needAlerthere = (txt) => {
     const alertxt=document.getElementById('alertTxt');
     const alertxtbox=document.getElementById('alertBox');
